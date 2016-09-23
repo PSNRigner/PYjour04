@@ -10,7 +10,7 @@ def marvin(ast: Decl) -> str:
         if isinstance(d.ctype, PrimaryType):
             result += variable(d)
         result += "\n"
-        print(vars(d))
+        #print(vars(d))
     return result
 
 
