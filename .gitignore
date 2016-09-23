@@ -1,3 +1,6 @@
-jdr.py
+jdr
 .idea/
 main.py
+test.c
+output
+__pycache__
