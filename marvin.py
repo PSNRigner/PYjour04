@@ -24,14 +24,22 @@ def variable(ast) -> str:
     ptype = ast.ctype
     d = array_rec(ptype)
     result += d[0]
+    c = d[2]
     d = d[1]
     e = 0
     while d and isinstance(d, PointerType):
         result += " un" if e == 0 else " de"
         if d._decltype and isinstance(d._decltype, PointerType):
             result += " pointeur"
+            if c != -1:
+                result += " constant"
+                c = -1
         else:
-            result += " pointeur sur"
+            result += " pointeur"
+            if c != -1:
+                result += " constant"
+                c = -1
+            result += " sur"
         d = d._decltype
         e += 1
 
@@ -41,7 +49,7 @@ def variable(ast) -> str:
             "float": " un floattant",
             "double": " un floattant double precision",
             "void": " rien",
-            "char": "",
+            "char": " un caractere",
             "GG": ""
         }[ptype._identifier]
 
@@ -52,10 +60,9 @@ def variable(ast) -> str:
             6: " court"
         }.get(ptype._specifier, '')
 
-    if ptype._decltype and hasattr(ptype._decltype, '_qualifier'):
-        result += {
-            1: " constant"
-        }.get(ptype._decltype._qualifier, '')
+    result += {
+        1: " constant"
+    }.get(c, '')
 
     if hasattr(ptype, '_sign'):
         result += {
@@ -79,6 +86,10 @@ def array_rec(ptype):
     val = []
     m = 0
     d = ptype._decltype
+    c = -1
+    if isinstance(d, QualType):
+        c = d._qualifier
+        d = d._decltype
     while d and isinstance(d, ArrayType):
         if isinstance(d.expr, Literal):
             val.append(d.expr.value)
@@ -88,6 +99,8 @@ def array_rec(ptype):
         m += 1
 
     d = ptype._decltype
+    if isinstance(d, QualType):
+        d = d._decltype
     i = 0
 
     while d and isinstance(d, ArrayType):
@@ -100,4 +113,4 @@ def array_rec(ptype):
         i += 1
         if not d:
             result += " ou chaque case contient"
-    return result, d
+    return result, d, c
