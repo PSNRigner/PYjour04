@@ -2,15 +2,13 @@ from cnorm.nodes import *
 
 
 # noinspection PyUnresolvedReferences,PyProtectedMember
-def marvin(ast: Decl) -> str:
-    result = ""
-    for d in ast.body:
-        result += "je definie! " if not d.colon_expr() else "je declare! "
-        result += d._name
-        if isinstance(d.ctype, PrimaryType):
-            result += variable(d)
-        result += "\n"
-        #print(vars(d))
+def marvin(d: Decl) -> str:
+    result = "je definie! " if not d.colon_expr() else "je declare! "
+    result += d._name
+    if isinstance(d.ctype, PrimaryType):
+        result += variable(d)
+    result += "\n"
+    # print(vars(d))
     return result
 
 
@@ -22,26 +20,9 @@ def variable(ast) -> str:
         return " est un champs de bit"
 
     ptype = ast.ctype
-    d = array_rec(ptype)
-    result += d[0]
-    c = d[2]
-    d = d[1]
-    e = 0
-    while d and isinstance(d, PointerType):
-        result += " un" if e == 0 else " de"
-        if d._decltype and isinstance(d._decltype, PointerType):
-            result += " pointeur"
-            if c != -1:
-                result += " constant"
-                c = -1
-        else:
-            result += " pointeur"
-            if c != -1:
-                result += " constant"
-                c = -1
-            result += " sur"
-        d = d._decltype
-        e += 1
+    r = rec(ptype._decltype)
+    result += r[0]
+    c = r[1]
 
     if ptype._identifier != '':
         result += {
@@ -60,9 +41,7 @@ def variable(ast) -> str:
             6: " court"
         }.get(ptype._specifier, '')
 
-    result += {
-        1: " constant"
-    }.get(c, '')
+    result += get_const(c)
 
     if hasattr(ptype, '_sign'):
         result += {
@@ -81,36 +60,35 @@ def variable(ast) -> str:
 
 
 # noinspection PyProtectedMember
-def array_rec(ptype):
+def rec(d, index=0):
     result = ""
-    val = []
-    m = 0
-    d = ptype._decltype
     c = -1
-    if isinstance(d, QualType):
+    if d and isinstance(d, QualType):
         c = d._qualifier
         d = d._decltype
-    while d and isinstance(d, ArrayType):
-        if isinstance(d.expr, Literal):
-            val.append(d.expr.value)
-        else:
-            val.append(0)
-        d = d._decltype
-        m += 1
-
-    d = ptype._decltype
-    if isinstance(d, QualType):
-        d = d._decltype
-    i = 0
-
-    while d and isinstance(d, ArrayType):
-        result += (" de" if i != 0 else " un") + " tableau"
+    if not d:
+        return result, c
+    r = rec(d._decltype, index + 1)
+    result += r[0]
+    c2 = r[1]
+    if isinstance(d, ArrayType):
+        result += (" de" if d._decltype else " un") + " tableau" + get_const(c)
         if isinstance(d.expr, Binary):
             result += " dont la taille depend d'une expression relou a calculer"
         elif isinstance(d.expr, Literal):
-            result += " de taille " + val[m - 1 - i]
-        d = d._decltype
-        i += 1
-        if not d:
+            result += " de taille " + d.expr.value
+        if index == 0:
             result += " ou chaque case contient"
-    return result, d, c
+    elif isinstance(d, PointerType):
+        result += " de" if d._decltype else " un"
+        result += " pointeur" + get_const(c)
+        if index == 0:
+            result += " sur"
+    return result, c2
+
+
+def get_const(c):
+    return {
+        1: " constant",
+        2: " toujours mis a jour lorsqu'on y accede"
+    }.get(c, '')
