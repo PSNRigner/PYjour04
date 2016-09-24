@@ -30,9 +30,8 @@ def variable(ast) -> str:
             "float": " un floattant",
             "double": " un floattant double precision",
             "void": " rien",
-            "char": " un caractere",
-            "GG": ""
-        }[ptype._identifier]
+            "char": " un caractere"
+        }.get(ptype._identifier, " de type utilisateur " + ptype._identifier)
 
     if ptype._specifier != 0:
         result += {
