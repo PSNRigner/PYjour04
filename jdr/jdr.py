@@ -86,7 +86,7 @@ class Pool:
         else:
             return str(self.result)
 
-    def roll(self, v=None):
+    def roll(self, v=None, r=False):
         f = False
         if v is None:
             f = True
@@ -127,10 +127,30 @@ class Pool:
                     i -= 1
                 if i == -1:
                     break
+            if r:
+                return ta
             return my_yield(ta)
 
     def __repr__(self):
         return self.str
+
+    def success(self, x):
+        ta = self.roll(r=True)
+        i = 0
+        j = 0
+        for t in ta:
+            i += 1
+            if x(t):
+                j += 1
+        return j * 100 / i
+
+    @staticmethod
+    def darkness(x):
+        i = 0
+        for v in x:
+            if v >= 5:
+                i += 1
+        return i >= 4
 
 
 class AbstractResult(Pool):
