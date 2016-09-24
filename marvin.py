@@ -67,12 +67,13 @@ def rec(d, index=0):
         c = d._qualifier
         d = d._decltype
     if not d:
-        return result, c
+        return result, c, True
     r = rec(d._decltype, index + 1)
     result += r[0]
     c2 = r[1]
+    last = r[2]
     if isinstance(d, ArrayType):
-        result += (" de" if d._decltype else " un") + " tableau" + get_const(c)
+        result += (" de" if not last else " un") + " tableau" + get_const(c)
         if isinstance(d.expr, Binary):
             result += " dont la taille depend d'une expression relou a calculer"
         elif isinstance(d.expr, Literal):
@@ -80,11 +81,11 @@ def rec(d, index=0):
         if index == 0:
             result += " ou chaque case contient"
     elif isinstance(d, PointerType):
-        result += " de" if d._decltype else " un"
+        result += " de" if not last else " un"
         result += " pointeur" + get_const(c)
         if index == 0:
             result += " sur"
-    return result, c2
+    return result, c2, False
 
 
 def get_const(c):
