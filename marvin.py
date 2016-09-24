@@ -3,21 +3,36 @@ from cnorm.nodes import *
 
 # noinspection PyUnresolvedReferences,PyProtectedMember
 def marvin(d: Decl) -> str:
-    result = "je definie! " if not d.colon_expr() else "je declare! "
-    result += d._name
+    result = d._name
+    r = ("", False)
     if isinstance(d.ctype, PrimaryType):
-        result += variable(d)
+        r = variable(d)
+        result += r[0]
+    elif isinstance(d.ctype, ComposedType):
+        # print(">>")
+        # print(vars(d))
+        r = composed(d)
+        result += r[0]
+    result = ("je definie! " if d.colon_expr() is None and not r[1] else "je declare! ") + result
     result += "\n"
     # print(vars(d))
     return result
 
 
 # noinspection PyProtectedMember
+def composed(ast) -> str:
+    ctype = ast.ctype
+    if hasattr(ctype, "enums"):
+        return " est un enumere %squi a %d valeurs possibles" % ("" if ctype._identifier == '' else ctype._identifier + " ", len(ctype.enums)), False
+    return "", True
+
+
+# noinspection PyProtectedMember
 def variable(ast) -> str:
     result = " est"
 
-    if ast._colon_expr:
-        return " est un champs de bit"
+    if hasattr(ast, '_colon_expr') and ast._colon_expr:
+        return " est un champs de bit", False
 
     ptype = ast.ctype
     r = rec(ptype._decltype)
@@ -55,7 +70,7 @@ def variable(ast) -> str:
     if hasattr(ast, '_assign_expr'):
         result += " qui est initialise a une certaine valeur mais ca me saoule"
 
-    return result
+    return result, False
 
 
 # noinspection PyProtectedMember,PyUnresolvedReferences
