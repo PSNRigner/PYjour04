@@ -13,7 +13,22 @@ class AddPool:
         return self.l.throw() + self.r.throw()
 
     def show(self):
-        return str(self.l.show()) + ", " + str(self.r.throw())
+        return str(self.l.show()) + ", " + str(self.r.show())
+
+
+class SubPool:
+    def __init__(self, l, r):
+        self.l = l
+        self.r = r
+
+    def __repr__(self):
+        return repr(self.l) + " - " + repr(self.r)
+
+    def throw(self):
+        return self.l.throw() - self.r.throw()
+
+    def show(self):
+        return str(self.l.show()) + ", -" + str(self.r.show())
 
 
 class MultPool:
@@ -72,6 +87,16 @@ class Pool:
         if not isinstance(c, int):
             raise TypeError("the multiplicator is obviously a int not a %s" % type(c))
         return Pool(MultPool(c, self))
+
+    def __sub__(self, thing):
+        if isinstance(thing, int):
+            thing = FrozenDice(thing)
+        return Pool(SubPool(self, thing))
+
+    def __rsub__(self, thing):
+        if isinstance(thing, int):
+            thing = FrozenDice(thing)
+        return Pool(SubPool(thing, self))
 
     def throw(self):
         if self.op:

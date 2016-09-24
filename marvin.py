@@ -59,7 +59,7 @@ def variable(ast) -> str:
     return result
 
 
-# noinspection PyProtectedMember
+# noinspection PyProtectedMember,PyUnresolvedReferences
 def rec(d, index=0):
     result = ""
     c = -1
