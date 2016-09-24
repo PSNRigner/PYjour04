@@ -61,6 +61,7 @@ class MultPool:
 class Pool:
     min = 1
     max = 1
+    darkness = lambda x: Pool._darkness(x)
 
     def __init__(self, op, v=None):
         self.op = op
@@ -170,7 +171,7 @@ class Pool:
         return j * 100 / i
 
     @staticmethod
-    def darkness(x):
+    def _darkness(x):
         i = 0
         for v in x:
             if v >= 5:
