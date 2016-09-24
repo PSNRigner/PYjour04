@@ -34,7 +34,13 @@ def variable(ast) -> str:
     if hasattr(ast, '_colon_expr') and ast._colon_expr:
         return " est un champs de bit", False
 
+    ad = False
+
     ptype = ast.ctype
+    s = ptype._storage
+    if s == 2:
+        result += " un type sur"
+        ad = True
     r = rec(ptype._decltype)
     result += r[0]
     c = r[1]
@@ -70,7 +76,7 @@ def variable(ast) -> str:
     if hasattr(ast, '_assign_expr'):
         result += " qui est initialise a une certaine valeur mais ca me saoule"
 
-    return result, False
+    return result, ad
 
 
 # noinspection PyProtectedMember,PyUnresolvedReferences
