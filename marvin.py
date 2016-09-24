@@ -3,7 +3,7 @@ from cnorm.nodes import *
 
 # noinspection PyUnresolvedReferences,PyProtectedMember
 def marvin(d: Decl) -> str:
-    result = d._name
+    result = d._name if d._name else "tout seul dans son coin,"
     r = ("", False)
     if isinstance(d.ctype, PrimaryType):
         r = variable(d)
@@ -22,14 +22,33 @@ def marvin(d: Decl) -> str:
 # noinspection PyProtectedMember
 def composed(ast) -> str:
     ctype = ast.ctype
+    if ast._name:
+        result = " est"
+    else:
+        result = ""
     if hasattr(ctype, "enums"):
-        return " est un enumere %squi a %d valeurs possibles" % ("" if ctype._identifier == '' else ctype._identifier + " ", len(ctype.enums)), False
-    return "", True
+        return result + " un enumere %squi a %d valeurs possibles" % ("" if ctype._identifier == '' else ctype._identifier + " ", len(ctype.enums)), False
+
+    result += {
+        1: " une structure",
+        2: " une union"
+    }[ctype._specifier]
+
+    if ctype._identifier:
+        result += " " + ctype._identifier
+
+    if ctype.fields:
+        result += " qui contient des champs qui me saoulent"
+
+    return result, ast._name == ''
 
 
 # noinspection PyProtectedMember
 def variable(ast) -> str:
-    result = " est"
+    if ast._name:
+        result = " est"
+    else:
+        result = ""
 
     if hasattr(ast, '_colon_expr') and ast._colon_expr:
         return " est un champs de bit", False
