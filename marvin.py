@@ -41,6 +41,8 @@ def variable(ast) -> str:
     if s == 2:
         result += " un type sur"
         ad = True
+    if s == 4:
+        ad = True
     r = rec(ptype._decltype)
     result += r[0]
     c = r[1]
