@@ -62,6 +62,8 @@ def variable(ast) -> str:
         ad = True
     if s == 4:
         ad = True
+    if isinstance(ptype, FuncType):
+        result += " une fonction qui retourne"
     r = rec(ptype._decltype)
     result += r[0]
     c = r[1]
@@ -91,11 +93,15 @@ def variable(ast) -> str:
 
     result += {
         1: " stocker dans un registre",
-        3: " definie localement"
+        3: " definie localement",
+        5: " et dont le code est integrer a l'appelant"
     }.get(ptype._storage, '')
 
     if hasattr(ast, '_assign_expr'):
         result += " qui est initialise a une certaine valeur mais ca me saoule"
+
+    if isinstance(ptype, FuncType) and hasattr(ptype, '_params') and ptype._params is not None and len(ptype._params) != 0:
+        result += " et qui prends des parametres qui me saoulent"
 
     return result, ad
 
