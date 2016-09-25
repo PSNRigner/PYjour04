@@ -122,7 +122,7 @@ def rec(d, index=0):
     last = r[2]
     if isinstance(d, ArrayType):
         result += (" de" if not last else " un") + " tableau" + get_const(c)
-        if isinstance(d.expr, Binary):
+        if isinstance(d.expr, Func):
             result += " dont la taille depend d'une expression relou a calculer"
         elif isinstance(d.expr, Literal):
             result += " de taille " + d.expr.value
