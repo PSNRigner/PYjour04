@@ -5,6 +5,8 @@ from cnorm.nodes import *
 def marvin(d: Decl) -> str:
     result = d._name if d._name else "tout seul dans son coin,"
     r = ("", False)
+    if d._name:
+        result += " est"
     if isinstance(d.ctype, PrimaryType):
         r = variable(d)
         result += r[0]
@@ -20,12 +22,10 @@ def marvin(d: Decl) -> str:
 
 
 # noinspection PyProtectedMember
-def composed(ast) -> str:
-    ctype = ast.ctype
-    if ast._name:
-        result = " est"
-    else:
-        result = ""
+def composed(ast=None, ctype=None) -> str:
+    if ctype is None:
+        ctype = ast.ctype
+    result = ""
     if hasattr(ctype, "enums"):
         return result + " un enumere %squi a %d valeurs possibles" % ("" if ctype._identifier == '' else ctype._identifier + " ", len(ctype.enums)), False
 
@@ -40,19 +40,15 @@ def composed(ast) -> str:
     if ctype.fields:
         result += " qui contient des champs qui me saoulent"
 
-    return result, ast._name == ''
+    return result, (ast is None or ast._name == '')
 
 
 # noinspection PyProtectedMember
 def variable(ast) -> str:
-    if ast._name:
-        result = " est"
-    else:
-        result = ""
-
     if hasattr(ast, '_colon_expr') and ast._colon_expr:
-        return " est un champs de bit", False
+        return " un champs de bit", False
 
+    result = ""
     ad = False
 
     ptype = ast.ctype
@@ -76,6 +72,10 @@ def variable(ast) -> str:
             "void": " rien",
             "char": " un caractere"
         }.get(ptype._identifier, " de type utilisateur " + ptype._identifier)
+    elif hasattr(ptype, 'fields'):
+        r = composed(ctype=ptype)
+        result += r[0]
+        ad = r[1]
 
     if ptype._specifier != 0:
         result += {
