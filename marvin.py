@@ -60,6 +60,8 @@ def variable(ast) -> str:
         ad = True
     if isinstance(ptype, FuncType):
         result += " une fonction qui retourne"
+        if ptype._storage != 5:
+            ad = True
     r = rec(ptype._decltype)
     result += r[0]
     c = r[1]
@@ -75,7 +77,6 @@ def variable(ast) -> str:
     elif hasattr(ptype, 'fields'):
         r = composed(ctype=ptype)
         result += r[0]
-        ad = r[1]
 
     if ptype._specifier != 0:
         result += {
